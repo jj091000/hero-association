@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 public class HeroMapper {
 
     public HeroDAO mapHeroToHeroDAO(Hero hero){
-        return null;
+        HeroDAO heroDAO = new HeroDAO();
+        heroDAO.setFirstName(hero.getFirstName());
+        heroDAO.setLastName(hero.getLastName());
+        heroDAO.setSuperHeroName(hero.getSuperHeroName());
+        return heroDAO;
     }
 }

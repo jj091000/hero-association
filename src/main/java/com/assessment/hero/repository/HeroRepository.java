@@ -20,10 +20,7 @@ public class HeroRepository {
     }
 
     public void save(Hero hero){
-        HeroDAO heroDAO = new HeroDAO();
-        heroDAO.setFirstName(hero.getFirstName());
-        heroDAO.setLastName(hero.getLastName());
-        heroDAO.setSuperHeroName(hero.getSuperHeroName());
+        HeroDAO heroDAO = heroMapper.mapHeroToHeroDAO(hero);
         heroCRUDRepository.save(heroDAO);
     }
 }
