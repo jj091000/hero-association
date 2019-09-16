@@ -4,6 +4,7 @@ import com.assessment.hero.HeroAssociation;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.service.HeroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -16,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.assessment.hero.HeroUtil.BuildHero;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,16 +34,30 @@ public class HeroControllerTest {
     @MockBean
     private HeroService heroService;
 
+    private Hero hero;
+
+    @Before
+    public void setUp() throws Exception {
+        hero = BuildHero();
+    }
+
     @Test
     public void test_create_hero_should_return_ok() throws Exception {
+        //when
         ResultActions result = mockMvc.perform((post("/hero/create")
                 .contentType(MediaType.APPLICATION_JSON))
-                .content(objectMapper.writeValueAsString(BuildHero())));
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
         result.andExpect(status().isOk());
     }
 
     @Test
     public void test_create_hero_should_return_bad_request_when_request_body_is_null() throws Exception {
+        //given
+        hero = null;
+
+        //when
         ResultActions result = mockMvc.perform((post("/hero/create")
                 .contentType(MediaType.APPLICATION_JSON))
                 .content(objectMapper.writeValueAsString(null)));
@@ -50,18 +66,12 @@ public class HeroControllerTest {
 
     @Test
     public void test_create_hero_should_call_service_to_create_received_hero() throws Exception {
-        Hero hero = BuildHero();
+        //when
         ResultActions result = mockMvc.perform((post("/hero/create")
                 .contentType(MediaType.APPLICATION_JSON))
                 .content(objectMapper.writeValueAsString(hero)));
-        Mockito.verify(heroService).create(eq(hero));
-    }
 
-    private Hero BuildHero(){
-        Hero hero =  new Hero();
-        hero.setFirstName("FirstName");
-        hero.setLastName("LastName");
-        hero.setSuperHeroName("SuperHeroName");
-        return hero;
+        //then
+        Mockito.verify(heroService).create(eq(hero));
     }
 }
