@@ -2,6 +2,7 @@ package com.assessment.hero.repository;
 
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.HeroCRUDRepository;
+import com.assessment.hero.repository.database.model.HeroDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +17,10 @@ public class HeroRepository {
     }
 
     public void save(Hero hero){
-        heroCRUDRepository.save(hero);
+        HeroDAO heroDAO = new HeroDAO();
+        heroDAO.setFirstName(hero.getFirstName());
+        heroDAO.setLastName(hero.getLastName());
+        heroDAO.setSuperHeroName(hero.getSuperHeroName());
+        heroCRUDRepository.save(heroDAO);
     }
 }
