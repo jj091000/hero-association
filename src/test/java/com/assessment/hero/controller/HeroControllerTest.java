@@ -41,6 +41,14 @@ public class HeroControllerTest {
     }
 
     @Test
+    public void test_create_hero_should_return_bad_request_when_request_body_is_null() throws Exception {
+        ResultActions result = mockMvc.perform((post("/hero/create")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(null)));
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void test_create_hero_should_call_service_to_create_received_hero() throws Exception {
         Hero hero = BuildHero();
         ResultActions result = mockMvc.perform((post("/hero/create")
