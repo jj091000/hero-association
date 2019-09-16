@@ -16,6 +16,6 @@ public class HeroService {
     }
 
     public void create(Hero hero){
-
+        heroRepository.save(hero);
     }
 }
