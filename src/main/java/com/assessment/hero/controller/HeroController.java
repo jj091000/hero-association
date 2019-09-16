@@ -1,5 +1,6 @@
 package com.assessment.hero.controller;
 
+import com.assessment.hero.exception.DuplicateRecordException;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.service.HeroService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,11 @@ public class HeroController {
 
     @PostMapping("/hero/create")
     public ResponseEntity<String> createHero(@RequestBody @Valid Hero hero) {
-        heroService.create(hero);
-        return new ResponseEntity(HttpStatus.OK);
+        try {
+            heroService.create(hero);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (DuplicateRecordException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 }

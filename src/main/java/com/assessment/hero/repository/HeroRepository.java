@@ -1,5 +1,6 @@
 package com.assessment.hero.repository;
 
+import com.assessment.hero.exception.DuplicateRecordException;
 import com.assessment.hero.mapping.HeroMapper;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.HeroCRUDRepository;
@@ -19,7 +20,15 @@ public class HeroRepository {
         this.heroMapper = heroMapper;
     }
 
-    public void save(Hero hero){
+    public void create(Hero hero) throws DuplicateRecordException {
+        String superHeroName = hero.getSuperHeroName();
+        if(heroCRUDRepository.existsBySuperHeroName(superHeroName)){
+            throw new DuplicateRecordException("Cannot create hero, Super hero name : " + superHeroName + ", already used");
+        }
+        save(hero);
+    }
+
+    private void save(Hero hero){
         HeroDAO heroDAO = heroMapper.mapHeroToHeroDAO(hero);
         heroCRUDRepository.save(heroDAO);
     }

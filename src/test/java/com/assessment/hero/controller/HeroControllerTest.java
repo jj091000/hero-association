@@ -1,5 +1,6 @@
 package com.assessment.hero.controller;
 
+import com.assessment.hero.exception.DuplicateRecordException;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.HeroCRUDRepository;
 import com.assessment.hero.service.HeroService;
@@ -20,7 +21,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static com.assessment.hero.HeroUtil.BuildHero;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -45,7 +49,7 @@ public class HeroControllerTest {
     static class HeroControllerTestConfiguration {
         @Bean
         public HeroCRUDRepository heroCRUDRepository(){
-            return Mockito.mock(HeroCRUDRepository.class);
+            return mock(HeroCRUDRepository.class);
         }
     }
 
@@ -123,5 +127,20 @@ public class HeroControllerTest {
 
         //then
         result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void test_create_hero_should_return_bad_request_with_exception_message_when_duplicate_superheroname() throws Exception {
+        //given
+        DuplicateRecordException exception = new DuplicateRecordException("error");
+        doThrow(exception).when(heroService).create(eq(hero));
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/create")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isNotAcceptable()).andExpect(content().string("error"));
     }
 }

@@ -1,5 +1,6 @@
 package com.assessment.hero.service;
 
+import com.assessment.hero.exception.DuplicateRecordException;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.HeroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ public class HeroService {
         this.heroRepository = heroRepository;
     }
 
-    public void create(Hero hero){
-        heroRepository.save(hero);
+    public void create(Hero hero) throws DuplicateRecordException {
+        heroRepository.create(hero);
     }
 }
