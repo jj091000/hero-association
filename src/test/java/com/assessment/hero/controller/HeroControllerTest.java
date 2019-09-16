@@ -1,7 +1,7 @@
 package com.assessment.hero.controller;
 
-import com.assessment.hero.HeroAssociation;
 import com.assessment.hero.model.Hero;
+import com.assessment.hero.repository.database.HeroCRUDRepository;
 import com.assessment.hero.service.HeroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -10,9 +10,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -23,7 +24,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = HeroAssociation.class)
 @WebMvcTest(HeroController.class)
 public class HeroControllerTest {
 
@@ -39,6 +39,14 @@ public class HeroControllerTest {
     @Before
     public void setUp() throws Exception {
         hero = BuildHero();
+    }
+
+    @TestConfiguration
+    static class HeroControllerTestConfiguration {
+        @Bean
+        public HeroCRUDRepository heroCRUDRepository(){
+            return Mockito.mock(HeroCRUDRepository.class);
+        }
     }
 
     @Test
@@ -73,5 +81,19 @@ public class HeroControllerTest {
 
         //then
         Mockito.verify(heroService).create(eq(hero));
+    }
+
+    @Test
+    public void test_create_hero_should_validate_superHeroName_is_not_null() throws Exception {
+        //given
+        hero.setSuperHeroName(null);
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/create")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isBadRequest());
     }
 }
