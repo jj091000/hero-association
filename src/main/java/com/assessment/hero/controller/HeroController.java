@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 public class HeroController {
 
@@ -20,7 +22,7 @@ public class HeroController {
     }
 
     @PostMapping("/hero/create")
-    public ResponseEntity<String> createHero(@RequestBody Hero hero) {
+    public ResponseEntity<String> createHero(@RequestBody @Valid Hero hero) {
         heroService.create(hero);
         return new ResponseEntity(HttpStatus.OK);
     }

@@ -96,4 +96,32 @@ public class HeroControllerTest {
         //then
         result.andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void test_create_hero_should_validate_superHeroName_is_not_empty() throws Exception {
+        //given
+        hero.setSuperHeroName("");
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/create")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void test_create_hero_should_validate_superHeroName_is_not_blank() throws Exception {
+        //given
+        hero.setSuperHeroName(" ");
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/create")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isBadRequest());
+    }
 }
