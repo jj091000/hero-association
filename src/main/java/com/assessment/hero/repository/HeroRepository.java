@@ -16,6 +16,6 @@ public class HeroRepository {
     }
 
     public void save(Hero hero){
-
+        heroCRUDRepository.save(hero);
     }
 }
