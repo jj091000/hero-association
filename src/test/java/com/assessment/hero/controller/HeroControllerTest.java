@@ -1,6 +1,7 @@
 package com.assessment.hero.controller;
 
 import com.assessment.hero.exception.DuplicateRecordException;
+import com.assessment.hero.exception.MissingRecordException;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.HeroCRUDRepository;
 import com.assessment.hero.service.HeroService;
@@ -54,7 +55,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_return_ok() throws Exception {
+    public void create_hero_should_return_ok() throws Exception {
         //when
         ResultActions result = mockMvc.perform((post("/hero/create")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -65,7 +66,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_return_bad_request_when_request_body_is_null() throws Exception {
+    public void create_hero_should_return_bad_request_when_request_body_is_null() throws Exception {
         //given
         hero = null;
 
@@ -77,7 +78,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_call_service_to_create_received_hero() throws Exception {
+    public void create_hero_should_call_service_to_create_received_hero() throws Exception {
         //when
         ResultActions result = mockMvc.perform((post("/hero/create")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -88,7 +89,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_validate_superHeroName_is_not_null() throws Exception {
+    public void create_hero_should_validate_superHeroName_is_not_null() throws Exception {
         //given
         hero.setSuperHeroName(null);
 
@@ -102,7 +103,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_validate_superHeroName_is_not_empty() throws Exception {
+    public void create_hero_should_validate_superHeroName_is_not_empty() throws Exception {
         //given
         hero.setSuperHeroName("");
 
@@ -116,7 +117,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_validate_superHeroName_is_not_blank() throws Exception {
+    public void create_hero_should_validate_superHeroName_is_not_blank() throws Exception {
         //given
         hero.setSuperHeroName(" ");
 
@@ -130,7 +131,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_create_hero_should_return_bad_request_with_exception_message_when_duplicate_superheroname() throws Exception {
+    public void create_hero_should_return_bad_request_with_exception_message_when_duplicate_superheroname() throws Exception {
         //given
         DuplicateRecordException exception = new DuplicateRecordException("error");
         doThrow(exception).when(heroService).create(eq(hero));
@@ -145,7 +146,7 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_read_hero_should_return_matching_hero() throws Exception {
+    public void read_hero_should_return_matching_hero() throws Exception {
         //given
         when(heroService.readHero(eq(SUPER_HERO_NAME))).thenReturn(hero);
 
@@ -159,13 +160,43 @@ public class HeroControllerTest {
     }
 
     @Test
-    public void test_read_hero_should_return_message_when_no_hero_found() throws Exception {
+    public void read_hero_should_return_message_when_no_hero_found() throws Exception {
+        //given
+        MissingRecordException exception = new MissingRecordException("error");
+        doThrow(exception).when(heroService).readHero(eq(SUPER_HERO_NAME));
+
         //when
         ResultActions result = mockMvc.perform((post("/hero/read")
                 .contentType(MediaType.APPLICATION_JSON))
-                .content(objectMapper.writeValueAsString(SUPER_HERO_NAME)));
+                .param("superHeroName", SUPER_HERO_NAME));
 
         //then
-        result.andExpect(status().isNotAcceptable()).andExpect(content().string("No registered hero with this name"));
+        result.andExpect(status().isNotAcceptable()).andExpect(content().string("error"));
+    }
+
+    @Test
+    public void update_hero_should_call_update_and_return_ok_when_successful() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/update")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isOk());
+    }
+
+    @Test
+    public void update_hero_should_return_message_when_no_hero_found() throws Exception {
+        //given
+        MissingRecordException exception = new MissingRecordException("error");
+        doThrow(exception).when(heroService).updateHero(eq(hero));
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/update")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isNotAcceptable()).andExpect(content().string("error"));
     }
 }

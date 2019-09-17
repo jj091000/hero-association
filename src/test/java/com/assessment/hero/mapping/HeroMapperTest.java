@@ -41,4 +41,58 @@ public class HeroMapperTest {
         //then
         assertThat(result).isEqualToComparingFieldByField(heroDAO);
     }
+
+    @Test
+    public void mapUpdatedInfo_should_update_firstName_when_not_null(){
+        //given
+        Hero target = new Hero();
+        Hero source = BuildHero();
+
+        //when
+        heroMapper.mapUpdatedInfo(target, source);
+
+        //then
+        assertThat(target.getFirstName()).isEqualTo(source.getFirstName());
+    }
+
+    @Test
+    public void mapUpdatedInfo_should_not_update_firstName_when_null(){
+        //given
+        Hero target = new Hero();
+        Hero source = BuildHero();
+        source.setFirstName(null);
+
+        //when
+        heroMapper.mapUpdatedInfo(target, source);
+
+        //then
+        assertThat(target.getFirstName()).isNull();
+    }
+
+    @Test
+    public void mapUpdatedInfo_should_update_lastName_when_not_null(){
+        //given
+        Hero target = new Hero();
+        Hero source = BuildHero();
+
+        //when
+        heroMapper.mapUpdatedInfo(target, source);
+
+        //then
+        assertThat(target.getLastName()).isEqualTo(source.getLastName());
+    }
+
+    @Test
+    public void mapUpdatedInfo_should_not_update_lastName_when_null(){
+        //given
+        Hero target = new Hero();
+        Hero source = BuildHero();
+        source.setLastName(null);
+
+        //when
+        heroMapper.mapUpdatedInfo(target, source);
+
+        //then
+        assertThat(target.getLastName()).isNull();
+    }
 }

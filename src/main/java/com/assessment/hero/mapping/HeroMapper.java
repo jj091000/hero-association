@@ -22,4 +22,13 @@ public class HeroMapper {
         hero.setSuperHeroName(heroDAO.getSuperHeroName());
         return hero;
     }
+
+    public void mapUpdatedInfo(Hero target, Hero source){
+        if(source.getFirstName() != null) {
+            target.setFirstName(source.getFirstName());
+        }
+        if(source.getLastName() != null) {
+            target.setLastName(source.getLastName());
+        }
+    }
 }
