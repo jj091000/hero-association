@@ -1,6 +1,7 @@
 package com.assessment.hero.controller;
 
 import com.assessment.hero.exception.DuplicateRecordException;
+import com.assessment.hero.exception.MissingRecordException;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.service.HeroService;
 import org.slf4j.Logger;
@@ -38,10 +39,22 @@ public class HeroController {
     @PostMapping("/hero/read")
     public ResponseEntity<String> readHero(String superHeroName) {
         LOGGER.info("incoming request : {}", superHeroName);
-        Hero fetchedHero = heroService.readHero(superHeroName);
-        if(fetchedHero == null){
-            return new ResponseEntity("No registered hero with this name", HttpStatus.NOT_ACCEPTABLE);
+        try {
+            Hero fetchedHero = heroService.readHero(superHeroName);
+            return new ResponseEntity(fetchedHero.toString(), HttpStatus.OK);
+        } catch (MissingRecordException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         }
-        return new ResponseEntity(fetchedHero.toString(), HttpStatus.OK);
+    }
+
+    @PostMapping("/hero/update")
+    public ResponseEntity<String> updateHero(@RequestBody @Valid Hero hero) {
+        LOGGER.info("incoming request : {}", hero);
+        try {
+            heroService.updateHero(hero);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (MissingRecordException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 }

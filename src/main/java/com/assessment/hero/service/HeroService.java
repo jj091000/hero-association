@@ -1,6 +1,7 @@
 package com.assessment.hero.service;
 
 import com.assessment.hero.exception.DuplicateRecordException;
+import com.assessment.hero.exception.MissingRecordException;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.HeroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,13 @@ public class HeroService {
         heroRepository.create(hero);
     }
 
-    public Hero readHero(String superHeroName) {
+    public Hero readHero(String superHeroName) throws MissingRecordException {
         validateSuperHeroName(superHeroName);
         return heroRepository.findHeroBySuperHeroName(superHeroName);
+    }
+
+    public void updateHero(Hero hero) throws MissingRecordException {
+        heroRepository.update(hero);
     }
 
     private void validateSuperHeroName(String superHeroName) {

@@ -1,6 +1,7 @@
 package com.assessment.hero.repository;
 
 import com.assessment.hero.exception.DuplicateRecordException;
+import com.assessment.hero.exception.MissingRecordException;
 import com.assessment.hero.mapping.HeroMapper;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.HeroCRUDRepository;
@@ -29,24 +30,35 @@ public class HeroRepository {
     public void create(Hero hero) throws DuplicateRecordException {
         String superHeroName = hero.getSuperHeroName();
         if(heroCRUDRepository.existsBySuperHeroName(superHeroName)){
-            throw new DuplicateRecordException("Cannot create hero, Super hero name : " + superHeroName + ", already used");
+            throw new DuplicateRecordException("Super hero: " + superHeroName + ", already used");
         }
         save(hero);
+    }
+
+    public void update(Hero hero) throws MissingRecordException {
+        Hero target = findHeroBySuperHeroName(hero.getSuperHeroName());
+        heroMapper.mapUpdatedInfo(target, hero);
+        save(target);
+    }
+
+    public Hero findHeroBySuperHeroName(String superHeroName) throws MissingRecordException {
+        List<HeroDAO> bySuperHeroName = findRecordBySuperHeroName(superHeroName);
+
+        if(CollectionUtils.isEmpty(bySuperHeroName)){
+            throw new MissingRecordException("Super hero: " + superHeroName + ", doesn't exists");
+        }
+        return heroMapper.mapHeroDAOToHero(bySuperHeroName.get(0));
+    }
+
+    private List<HeroDAO> findRecordBySuperHeroName(String superHeroName) {
+        List<HeroDAO> bySuperHeroName = heroCRUDRepository.findBySuperHeroName(superHeroName);
+        LOGGER.info("found hero : {}", bySuperHeroName);
+        return bySuperHeroName;
     }
 
     private void save(Hero hero){
         HeroDAO heroDAO = heroMapper.mapHeroToHeroDAO(hero);
         heroCRUDRepository.save(heroDAO);
         LOGGER.info("saved hero : {}", hero);
-    }
-
-    public Hero findHeroBySuperHeroName(String superHeroName) {
-        List<HeroDAO> bySuperHeroName = heroCRUDRepository.findBySuperHeroName(superHeroName);
-        LOGGER.info("found hero : {}", bySuperHeroName);
-
-        if(!CollectionUtils.isEmpty(bySuperHeroName) && bySuperHeroName.get(0) != null){
-            return heroMapper.mapHeroDAOToHero(bySuperHeroName.get(0));
-        }
-        return null;
     }
 }
