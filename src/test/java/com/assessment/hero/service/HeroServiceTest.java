@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.assessment.hero.HeroUtil.BuildHero;
+import static com.assessment.hero.HeroUtil.SUPER_HERO_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,5 +53,14 @@ public class HeroServiceTest {
 
         //then
         assertThat(throwable).isEqualTo(mockException);
+    }
+
+    @Test
+    public void readHero_should_call_findHeroBySuperHeroName_when_receives_hero_name() throws Exception {
+        //when
+        heroService.readHero(SUPER_HERO_NAME);
+
+        //then
+        Mockito.verify(heroRepository).findHeroBySuperHeroName(eq(SUPER_HERO_NAME));
     }
 }

@@ -5,6 +5,7 @@ import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.HeroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class HeroService {
@@ -18,5 +19,16 @@ public class HeroService {
 
     public void create(Hero hero) throws DuplicateRecordException {
         heroRepository.create(hero);
+    }
+
+    public Hero readHero(String superHeroName) {
+        validateSuperHeroName(superHeroName);
+        return heroRepository.findHeroBySuperHeroName(superHeroName);
+    }
+
+    private void validateSuperHeroName(String superHeroName) {
+        if(StringUtils.isEmpty(superHeroName)){
+            throw new IllegalArgumentException("Please Enter valid super hero name ");
+        }
     }
 }

@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static com.assessment.hero.HeroUtil.BuildHero;
+import static com.assessment.hero.HeroUtil.SUPER_HERO_NAME;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -142,5 +142,30 @@ public class HeroControllerTest {
 
         //then
         result.andExpect(status().isNotAcceptable()).andExpect(content().string("error"));
+    }
+
+    @Test
+    public void test_read_hero_should_return_matching_hero() throws Exception {
+        //given
+        when(heroService.readHero(eq(SUPER_HERO_NAME))).thenReturn(hero);
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/read")
+                .contentType(MediaType.APPLICATION_JSON))
+                .param("superHeroName", SUPER_HERO_NAME));
+
+        //then
+        result.andExpect(status().isOk()).andExpect(content().string(hero.toString()));
+    }
+
+    @Test
+    public void test_read_hero_should_return_message_when_no_hero_found() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/read")
+                .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(SUPER_HERO_NAME)));
+
+        //then
+        result.andExpect(status().isNotAcceptable()).andExpect(content().string("No registered hero with this name"));
     }
 }
