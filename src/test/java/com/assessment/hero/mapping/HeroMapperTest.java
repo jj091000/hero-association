@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.assessment.hero.HeroUtil.BuildHero;
+import static com.assessment.hero.HeroUtil.BuildHeroDAO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class HeroMapperTest {
@@ -27,5 +28,17 @@ public class HeroMapperTest {
 
         //then
         assertThat(result).isEqualToComparingFieldByField(hero);
+    }
+
+    @Test
+    public void mapHeroToHeroDAO_should_transfer_data_from_hero_DAO_to_hero(){
+        //given
+        HeroDAO heroDAO = BuildHeroDAO();
+
+        //when
+        Hero result = heroMapper.mapHeroDAOToHero(heroDAO);
+
+        //then
+        assertThat(result).isEqualToComparingFieldByField(heroDAO);
     }
 }

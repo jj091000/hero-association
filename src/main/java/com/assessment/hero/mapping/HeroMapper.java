@@ -14,4 +14,12 @@ public class HeroMapper {
         heroDAO.setSuperHeroName(hero.getSuperHeroName());
         return heroDAO;
     }
+
+    public Hero mapHeroDAOToHero(HeroDAO heroDAO) {
+        Hero hero = new Hero();
+        hero.setFirstName(heroDAO.getFirstName());
+        hero.setLastName(heroDAO.getLastName());
+        hero.setSuperHeroName(heroDAO.getSuperHeroName());
+        return hero;
+    }
 }
