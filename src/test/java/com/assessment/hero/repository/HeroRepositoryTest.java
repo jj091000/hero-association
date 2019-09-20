@@ -4,7 +4,9 @@ import com.assessment.hero.exception.MissingRecordException;
 import com.assessment.hero.mapping.HeroMapper;
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.HeroCRUDRepository;
+import com.assessment.hero.repository.database.MissionCRUDRepository;
 import com.assessment.hero.repository.database.model.HeroDAO;
+import com.assessment.hero.repository.database.model.MissionDAO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,10 +16,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static com.assessment.hero.HeroUtil.*;
+import static com.assessment.hero.util.HeroUtil.*;
+import static com.assessment.hero.util.MissionUtil.MISSION_NAME;
+import static com.assessment.hero.util.MissionUtil.buildMissionDAO;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -32,6 +35,8 @@ public class HeroRepositoryTest {
     @Mock
     private HeroCRUDRepository heroCRUDRepository;
     @Mock
+    private MissionCRUDRepository missionCRUDRepository;
+    @Mock
     private HeroMapper heroMapper;
 
     private Hero hero;
@@ -39,7 +44,7 @@ public class HeroRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        heroRepository = new HeroRepository(heroCRUDRepository, heroMapper);
+        heroRepository = new HeroRepository(heroCRUDRepository, missionCRUDRepository, heroMapper);
         hero = BuildHero();
         heroDAO = BuildHeroDAO();
 
@@ -77,13 +82,13 @@ public class HeroRepositoryTest {
         ArgumentCaptor<HeroDAO> argumentCaptor = ArgumentCaptor.forClass(HeroDAO.class);
         Mockito.verify(heroCRUDRepository).save(argumentCaptor.capture());
         HeroDAO captorValue = argumentCaptor.getValue();
-        assertThat(captorValue).isEqualToComparingFieldByField(hero);
+        assertThat(captorValue).isEqualToIgnoringGivenFields(hero, "missions");
     }
 
     @Test
     public void save_should_not_create_new_record_if_superHeroName_already_used() throws Exception {
         //when
-        Throwable throwable = catchThrowable(()-> heroRepository.create(hero));
+        Throwable throwable = catchThrowable(() -> heroRepository.create(hero));
 
         //then
         assertThat(throwable).hasMessage("Super hero: " + SUPER_HERO_NAME + ", already used");
@@ -102,9 +107,9 @@ public class HeroRepositoryTest {
     }
 
     @Test
-    public void findHeroBySuperHeroName_should_throw_MissingRecordException_when_received_list_is_null()  throws Exception {
+    public void findHeroBySuperHeroName_should_throw_MissingRecordException_when_received_list_is_null() throws Exception {
         //when
-        Throwable throwable = catchThrowable(()-> heroRepository.findHeroBySuperHeroName("not" + SUPER_HERO_NAME));
+        Throwable throwable = catchThrowable(() -> heroRepository.findHeroBySuperHeroName("not" + SUPER_HERO_NAME));
 
         //then
         assertThat(throwable).isInstanceOf(MissingRecordException.class)
@@ -112,21 +117,21 @@ public class HeroRepositoryTest {
     }
 
     @Test
-    public void findHeroBySuperHeroName_should_throw_MissingRecordException_when_received_list_is_empty()  throws Exception {
+    public void findHeroBySuperHeroName_should_throw_MissingRecordException_when_received_list_is_empty() throws Exception {
         //given
-        when(heroCRUDRepository.findBySuperHeroName(eq(SUPER_HERO_NAME)))
-                .thenReturn(Collections.emptyList());
+        when(heroCRUDRepository.existsBySuperHeroName(eq(SUPER_HERO_NAME)))
+                .thenReturn(false);
 
         //when
-        Throwable throwable = catchThrowable(()-> heroRepository.findHeroBySuperHeroName(SUPER_HERO_NAME));
+        Throwable throwable = catchThrowable(() -> heroRepository.findHeroBySuperHeroName(SUPER_HERO_NAME));
 
         //then
         assertThat(throwable).isInstanceOf(MissingRecordException.class)
-        .hasMessage("Super hero: " + SUPER_HERO_NAME + ", doesn't exists");
+                .hasMessage("Super hero: " + SUPER_HERO_NAME + ", doesn't exists");
     }
 
     @Test
-    public void findHeroBySuperHeroName_should_call_mapper_to_transfer_data_from_hero_DAO_to_hero()  throws Exception {
+    public void findHeroBySuperHeroName_should_call_mapper_to_transfer_data_from_hero_DAO_to_hero() throws Exception {
         //given
         List<HeroDAO> record = new ArrayList<>();
         record.add(heroDAO);
@@ -141,7 +146,7 @@ public class HeroRepositoryTest {
     }
 
     @Test
-    public void findHeroBySuperHeroName_should_return_hero_received_from_herocrudrepository()  throws Exception {
+    public void findHeroBySuperHeroName_should_return_hero_received_from_herocrudrepository() throws Exception {
         //given
         List<HeroDAO> record = new ArrayList<>();
         record.add(heroDAO);
@@ -156,12 +161,12 @@ public class HeroRepositoryTest {
     }
 
     @Test
-    public void update_should_throw_MissingRecordException_when_hero_does_not_exists_yet()  throws Exception {
+    public void update_should_throw_MissingRecordException_when_hero_does_not_exists_yet() throws Exception {
         //given
         hero.setSuperHeroName("not" + SUPER_HERO_NAME);
 
         //when
-        Throwable throwable = catchThrowable(()-> heroRepository.update(hero));
+        Throwable throwable = catchThrowable(() -> heroRepository.update(hero));
 
         //then
         assertThat(throwable).isInstanceOf(MissingRecordException.class)
@@ -169,7 +174,7 @@ public class HeroRepositoryTest {
     }
 
     @Test
-    public void update_should_call_mapper_to_update_info_and_save_modifications()  throws Exception {
+    public void update_should_call_mapper_to_update_info_and_save_modifications() throws Exception {
         //given
         Hero source = BuildHero();
 
@@ -179,5 +184,45 @@ public class HeroRepositoryTest {
         //then
         verify(heroMapper).mapUpdatedInfo(eq(hero), eq(source));
         verify(heroCRUDRepository).save(eq(heroDAO));
+    }
+
+    @Test
+    public void addMissionToHeroRecord_should_throw_MissingRecordException_when_hero_does_not_exists_yet() throws Exception {
+        //given
+        hero.setSuperHeroName("not" + SUPER_HERO_NAME);
+
+        //when
+        Throwable throwable = catchThrowable(() -> heroRepository.addMissionToHeroRecord(SUPER_HERO_NAME, null));
+
+        //then
+        assertThat(throwable).isInstanceOf(MissingRecordException.class)
+                .hasMessage("Super hero: " + "not" + SUPER_HERO_NAME + ", doesn't exists");
+    }
+
+    @Test
+    public void addMissionToHeroRecord_should_throw_MissingRecordException_when_mission_does_not_exists_yet() throws Exception {
+        //when
+        Throwable throwable = catchThrowable(() -> heroRepository.addMissionToHeroRecord(SUPER_HERO_NAME, MISSION_NAME));
+
+        //then
+        assertThat(throwable).isInstanceOf(MissingRecordException.class)
+                .hasMessage("Mission: " + MISSION_NAME + ", doesn't exists");
+    }
+
+    @Test
+    public void addMissionToHeroRecord_should_add_mission_to_hero_DAO_and_save_updated_record() throws Exception {
+        //given
+        when(missionCRUDRepository.existsByMissionName(eq(MISSION_NAME))).thenReturn(true);
+        MissionDAO missionDAO = buildMissionDAO();
+        when(missionCRUDRepository.findByMissionName(eq(MISSION_NAME))).thenReturn(asList(buildMissionDAO()));
+
+        //when
+        heroRepository.addMissionToHeroRecord(SUPER_HERO_NAME, MISSION_NAME);
+
+        //then
+        ArgumentCaptor<HeroDAO> argumentCaptor = ArgumentCaptor.forClass(HeroDAO.class);
+        Mockito.verify(heroCRUDRepository).save(argumentCaptor.capture());
+        HeroDAO captorValue = argumentCaptor.getValue();
+        assertThat(captorValue.getMissions()).containsOnly(missionDAO);
     }
 }

@@ -9,8 +9,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.assessment.hero.HeroUtil.BuildHero;
-import static com.assessment.hero.HeroUtil.SUPER_HERO_NAME;
+import static com.assessment.hero.util.HeroUtil.BuildHero;
+import static com.assessment.hero.util.HeroUtil.SUPER_HERO_NAME;
+import static com.assessment.hero.util.MissionUtil.MISSION_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
@@ -62,40 +63,16 @@ public class HeroServiceTest {
         verify(heroRepository).findHeroBySuperHeroName(eq(SUPER_HERO_NAME));
     }
 
-    @Test
-    public void readHero_should_throw_execption_when_receives_null_super_hero_name() throws Exception {
-        //given
-        hero.setSuperHeroName(null);
-
+    @Test(expected = IllegalArgumentException.class)
+    public void readHero_should_throw_exception_when_receives_null_super_hero_name() throws Exception {
         //when
-        heroService.readHero(SUPER_HERO_NAME);
-
-        //then
-        verify(heroRepository).findHeroBySuperHeroName(eq(SUPER_HERO_NAME));
+        heroService.readHero(null);
     }
 
-    @Test
-    public void readHero_should_throw_execption_when_receives_empty_super_hero_name() throws Exception {
-        //given
-        hero.setSuperHeroName("");
-
+    @Test(expected = IllegalArgumentException.class)
+    public void readHero_should_throw_exception_when_receives_empty_super_hero_name() throws Exception {
         //when
-        heroService.readHero(SUPER_HERO_NAME);
-
-        //then
-        verify(heroRepository).findHeroBySuperHeroName(eq(SUPER_HERO_NAME));
-    }
-
-    @Test
-    public void readHero_should_throw_execption_when_receives_blank_super_hero_name() throws Exception {
-        //given
-        hero.setSuperHeroName(" ");
-
-        //when
-        heroService.readHero(SUPER_HERO_NAME);
-
-        //then
-        verify(heroRepository).findHeroBySuperHeroName(eq(SUPER_HERO_NAME));
+        heroService.readHero("");
     }
 
     @Test
@@ -105,5 +82,20 @@ public class HeroServiceTest {
 
         //then
         verify(heroRepository).update(eq(hero));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void assignMission_should_throw_exception_when_super_hero_name_not_valid() throws Exception {
+        //when
+        heroService.assignMission(null, MISSION_NAME);
+    }
+
+    @Test
+    public void assignMission_should_call_addMissionToHeroRecord_with_received_info() throws Exception {
+        //when
+        heroService.assignMission(SUPER_HERO_NAME, MISSION_NAME);
+
+        //then
+        verify(heroRepository).addMissionToHeroRecord(eq(SUPER_HERO_NAME), eq(MISSION_NAME));
     }
 }

@@ -57,4 +57,15 @@ public class HeroController {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         }
     }
+
+    @PostMapping("/hero/assignMission")
+    public ResponseEntity<String> assignMission(String superHeroName, String missionName) {
+        LOGGER.info("incoming request : {}", superHeroName, missionName);
+        try {
+            heroService.assignMission(superHeroName, missionName);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (MissingRecordException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
 }

@@ -36,4 +36,9 @@ public class HeroService {
             throw new IllegalArgumentException("Please Enter valid super hero name ");
         }
     }
+
+    public void assignMission(String superHeroName, String missionName) throws MissingRecordException {
+        validateSuperHeroName(superHeroName);
+        heroRepository.addMissionToHeroRecord(superHeroName, missionName);
+    }
 }

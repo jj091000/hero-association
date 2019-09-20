@@ -20,8 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.assessment.hero.HeroUtil.BuildHero;
-import static com.assessment.hero.HeroUtil.SUPER_HERO_NAME;
+import static com.assessment.hero.util.HeroUtil.BuildHero;
+import static com.assessment.hero.util.HeroUtil.SUPER_HERO_NAME;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -195,6 +195,21 @@ public class HeroControllerTest {
         ResultActions result = mockMvc.perform((post("/hero/update")
                 .contentType(MediaType.APPLICATION_JSON))
                 .content(objectMapper.writeValueAsString(hero)));
+
+        //then
+        result.andExpect(status().isNotAcceptable()).andExpect(content().string("error"));
+    }
+
+    @Test
+    public void read_hero_should_return_message_when_no_hero_found() throws Exception {
+        //given
+        MissingRecordException exception = new MissingRecordException("error");
+        doThrow(exception).when(heroService).readHero(eq(SUPER_HERO_NAME));
+
+        //when
+        ResultActions result = mockMvc.perform((post("/hero/read")
+                .contentType(MediaType.APPLICATION_JSON))
+                .param("superHeroName", SUPER_HERO_NAME));
 
         //then
         result.andExpect(status().isNotAcceptable()).andExpect(content().string("error"));

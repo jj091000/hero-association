@@ -1,4 +1,4 @@
-package com.assessment.hero;
+package com.assessment.hero.util;
 
 import com.assessment.hero.model.Hero;
 import com.assessment.hero.repository.database.model.HeroDAO;

@@ -5,8 +5,8 @@ import com.assessment.hero.repository.database.model.HeroDAO;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.assessment.hero.HeroUtil.BuildHero;
-import static com.assessment.hero.HeroUtil.BuildHeroDAO;
+import static com.assessment.hero.util.HeroUtil.BuildHero;
+import static com.assessment.hero.util.HeroUtil.BuildHeroDAO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class HeroMapperTest {
